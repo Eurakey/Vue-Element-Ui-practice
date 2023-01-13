@@ -54,6 +54,7 @@ let handleCurrentChange = function (cur) {
   curPage.value = cur;
 };
 
+//分页记忆
 let getRowKeys = (row) => {
   return row.tag_id;
 };
