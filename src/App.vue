@@ -1,24 +1,70 @@
 <script setup>
 import { tableData } from "./mock.js";
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { ElConfigProvider } from "element-plus";
+import zhCn from "element-plus/lib/locale/lang/zh-cn";
 
-let bilbili = ref(tableData);
+//选项
 let options = ref([
   {
-    value: 1,
+    value: true,
     label: "old_channel",
   },
   {
-    value: 2,
+    value: false,
     label: "new_channel",
   },
 ]);
-let oldOrNew = ref();
+let old = ref("");
+
+//分类
+let finalBili = function (condition) {
+  return tableData.filter((item) => item.tag_type === condition);
+};
+let totalChannel = ref(tableData);
+let oldChannel = ref(finalBili("old_channel"));
+let newChannel = ref(finalBili("new_channel"));
+let curChannel = computed(() => {
+  if (old.value === "") {
+    return totalChannel.value;
+  } else if (old.value) {
+    return oldChannel.value;
+  } else {
+    return newChannel.value;
+  }
+});
+
+//分页
+let thisPage = computed(() =>
+  curChannel.value.slice(
+    (curPage.value - 1) * pageSize.value,
+    curPage.value * pageSize.value
+  )
+);
+
+let size = computed(() => curChannel.value.length);
+let pageSize = ref(10);
+let curPage = ref(1);
+
+let handleSizeChange = function (size) {
+  pageSize.value = size;
+};
+
+let handleCurrentChange = function (cur) {
+  curPage.value = cur;
+};
 </script>
 
 <template>
   <div>
-    <el-select v-model="oldOrNew" placeholder="请选择">
+    <div>
+      <el-config-provider :locale="zhCn">
+        <router-view />
+      </el-config-provider>
+    </div>
+
+    <!-- 分类 -->
+    <el-select v-model="old" clearable placeholder="请选择">
       <el-option
         v-for="item in options"
         :key="item.value"
@@ -30,9 +76,9 @@ let oldOrNew = ref();
 
     <el-table
       ref="multipleTable"
-      :data="bilbili"
-      border="true"
-      stripe="true"
+      :data="thisPage"
+      border
+      stripe
       tooltip-effect="dark"
       style="width: 100%"
       @selection-change="handleSelectionChange"
@@ -71,9 +117,8 @@ let oldOrNew = ref();
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :page-sizes="[10, 15, 20, 25, 30]"
-        :page-size="10"
-        layout="sizes, prev, pager, next"
-        :total="100"
+        layout="total,sizes, prev, pager, next"
+        :total="size"
       >
       </el-pagination>
     </div>
