@@ -53,10 +53,15 @@ let handleSizeChange = function (size) {
 let handleCurrentChange = function (cur) {
   curPage.value = cur;
 };
+
+let getRowKeys = (row) => {
+  return row.tag_id;
+};
 </script>
 
 <template>
   <div>
+    <!-- 汉化 -->
     <div>
       <el-config-provider :locale="zhCn">
         <router-view />
@@ -74,16 +79,19 @@ let handleCurrentChange = function (cur) {
       </el-option>
     </el-select>
 
+    <!-- 表格 -->
     <el-table
       ref="multipleTable"
       :data="thisPage"
       border
       stripe
       tooltip-effect="dark"
+      :row-key="getRowKeys"
       style="width: 100%"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55"> </el-table-column>
+      <el-table-column type="selection" width="55" :reserve-selection="true">
+      </el-table-column>
       <el-table-column prop="tag_name" label="名称" width="150">
       </el-table-column>
       <el-table-column prop="tag_id" label="TagID" width="150">
@@ -112,6 +120,7 @@ let handleCurrentChange = function (cur) {
       </el-table-column>
     </el-table>
 
+    <!-- 分页 -->
     <div class="block">
       <el-pagination
         @size-change="handleSizeChange"
